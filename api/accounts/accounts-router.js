@@ -40,9 +40,21 @@ router.post(
   }
 );
 
-router.put("/:id", checkAccountId, checkAccountPayload, (req, res, next) => {
-  res.json("heeh");
-});
+router.put(
+  "/:id",
+  checkAccountId,
+  checkAccountPayload(Schema),
+  checkAccountNameUnique,
+  (req, res, next) => {
+    const { name, budget } = req.body;
+    const { id } = req.params;
+    Account.updateById(id, { name, budget }).then((data) => {
+      Account.getById(id).then((newData) => {
+        res.json(newData);
+      });
+    });
+  }
+);
 
 router.delete("/:id", checkAccountId, (req, res, next) => {
   Account.deleteById(req.params.id)
