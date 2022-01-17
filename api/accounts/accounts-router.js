@@ -1,6 +1,11 @@
 const router = require("express").Router();
 const Account = require("./accounts-model");
-const { checkAccountId } = require("./accounts-middleware");
+const Schema = require("../schema");
+const {
+  checkAccountId,
+  checkAccountPayload,
+  checkAccountNameUnique,
+} = require("./accounts-middleware");
 
 router.get("/", (req, res, next) => {
   Account.getAll()
@@ -19,16 +24,34 @@ router.get("/:id", checkAccountId, (req, res, next) => {
     .catch(next);
 });
 
-router.post("/", (req, res, next) => {
-  // DO YOUR MAGIC
+router.post(
+  "/",
+  checkAccountPayload(Schema),
+  checkAccountNameUnique,
+  (req, res, next) => {
+    const { name, budget } = req.body;
+    Account.create({ name, budget }).then((data) => {
+      Account.getById(data)
+        .then((newData) => {
+          res.status(201).json(newData);
+        })
+        .catch(next);
+    });
+  }
+);
+
+router.put("/:id", checkAccountId, checkAccountPayload, (req, res, next) => {
+  res.json("heeh");
 });
 
-router.put("/:id", (req, res, next) => {
-  // DO YOUR MAGIC
-});
-
-router.delete("/:id", (req, res, next) => {
-  // DO YOUR MAGIC
+router.delete("/:id", checkAccountId, (req, res, next) => {
+  Account.deleteById(req.params.id)
+    .then((data) => {
+      Account.getAll(data).then((newData) => {
+        res.json(newData);
+      });
+    })
+    .catch(next);
 });
 
 router.use((err, req, res, next) => {

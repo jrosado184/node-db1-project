@@ -1,13 +1,32 @@
 const Account = require("../accounts/accounts-model");
 
-exports.checkAccountPayload = (req, res, next) => {
+exports.checkAccountPayload = (schema) => async (req, res, next) => {
   // DO YOUR MAGIC
   // Note: you can either write "manual" validation logic
   // or use the Yup library (not currently installed)
+  try {
+    await schema.validate({
+      body: req.body,
+    });
+    return next();
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-exports.checkAccountNameUnique = (req, res, next) => {
-  // DO YOUR MAGIC
+exports.checkAccountNameUnique = async (req, res, next) => {
+  try {
+    const { name } = req.body;
+    const account = await Account.getAll();
+    const accountNames = account.some((a) => a.name === name);
+    if (accountNames) {
+      res.status(400).json({ message: "that name is taken" });
+    } else {
+      next();
+    }
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.checkAccountId = async (req, res, next) => {
