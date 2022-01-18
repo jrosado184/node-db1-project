@@ -5,9 +5,14 @@ exports.checkAccountPayload = (schema) => async (req, res, next) => {
   // Note: you can either write "manual" validation logic
   // or use the Yup library (not currently installed)
   try {
+    const { name, budget } = req.body;
+    if (name === undefined || budget === undefined) {
+      return res.status(400).json({ message: "name and budget are required" });
+    }
     await schema.validate({
       body: req.body,
     });
+
     return next();
   } catch (err) {
     res.status(400).json({ message: err.message });

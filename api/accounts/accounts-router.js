@@ -29,7 +29,8 @@ router.post(
   checkAccountPayload(Schema),
   checkAccountNameUnique,
   (req, res, next) => {
-    const { name, budget } = req.body;
+    let { name, budget } = req.body;
+    name = name.trim();
     Account.create({ name, budget }).then((data) => {
       Account.getById(data)
         .then((newData) => {
@@ -48,11 +49,13 @@ router.put(
   (req, res, next) => {
     const { name, budget } = req.body;
     const { id } = req.params;
-    Account.updateById(id, { name, budget }).then((data) => {
-      Account.getById(id).then((newData) => {
-        res.json(newData);
-      });
-    });
+    Account.updateById(id, { name, budget })
+      .then((data) => {
+        Account.getById(id).then((newData) => {
+          res.json(newData);
+        });
+      })
+      .catch(next);
   }
 );
 

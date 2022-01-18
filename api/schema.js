@@ -4,16 +4,17 @@ const Schema = yup.object({
   body: yup.object({
     name: yup
       .string()
-      .min(3, "name cannot be less than 3 characters")
-      .max(100, "name cannot be more than 100 characters")
-      .required("name is required")
+      .min(3, "between 3 and 100")
+      .max(100, "between 3 and 100")
+      .required("name and budget are required")
       .trim(),
     budget: yup
-      .number("budget of account must be a number")
+      .number("must be a number")
+      .transform((value) => (isNaN(value) ? undefined : value))
       .min(1)
-      .max(1000000)
+      .max(1000000, "budget of account is too large or too small")
       .positive("budget of account is too large or too small")
-      .required("budget is required"),
+      .required("must be a number"),
   }),
 });
 
